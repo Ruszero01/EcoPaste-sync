@@ -49,11 +49,21 @@ fn write_to_clipboard<R: Runtime>(
     let manager = tauri_plugin_eco_clipboard::get_clipboard_manager(app_handle);
     let manager = manager.inner();
 
-    // 默认粘贴用 value，纯文本粘贴用 search
-    let text = if plain {
-        if search.is_empty() { value } else { search }
-    } else {
-        value
+    // 格式文本（formatted/html/rtf）：始终用 search 作为纯文本 fallback
+    // 其他类型：plain=true 时用 search，否则用 value
+    let text = match item_type {
+        "formatted" | "html" | "rtf" => {
+            // 格式文本的纯文本 fallback 应该是渲染后的文本（search），而不是原始格式内容（value）
+            if search.is_empty() { value } else { search }
+        }
+        _ => {
+            // 其他类型根据 plain 标志决定
+            if plain {
+                if search.is_empty() { value } else { search }
+            } else {
+                value
+            }
+        }
     };
 
     match item_type {

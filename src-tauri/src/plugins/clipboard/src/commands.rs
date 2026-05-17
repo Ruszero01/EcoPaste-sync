@@ -119,7 +119,8 @@ impl ClipboardManager {
         let fingerprint = format!("html:{}", text);
         self.record_write_fingerprint(fingerprint);
 
-        let contents = vec![clipboard_rs::ClipboardContent::Text(text), clipboard_rs::ClipboardContent::Html(html)];
+        // HTML 格式在前，纯文本作为 fallback
+        let contents = vec![clipboard_rs::ClipboardContent::Html(html), clipboard_rs::ClipboardContent::Text(text)];
 
         self.context
             .lock()
@@ -134,6 +135,7 @@ impl ClipboardManager {
         let fingerprint = format!("rtf:{}", text);
         self.record_write_fingerprint(fingerprint);
 
+        // RTF 格式在前，纯文本作为 fallback
         let mut contents = vec![clipboard_rs::ClipboardContent::Rtf(rtf)];
 
         if cfg!(not(target_os = "macos")) {
@@ -873,7 +875,8 @@ pub async fn write_html(
     let fingerprint = format!("html:{}", text);
     manager.record_write_fingerprint(fingerprint);
 
-    let contents = vec![ClipboardContent::Text(text), ClipboardContent::Html(html)];
+    // HTML 格式在前，纯文本作为 fallback
+    let contents = vec![ClipboardContent::Html(html), ClipboardContent::Text(text)];
 
     manager
         .context
@@ -893,6 +896,7 @@ pub async fn write_rtf(
     let fingerprint = format!("rtf:{}", text);
     manager.record_write_fingerprint(fingerprint);
 
+    // RTF 格式在前，纯文本作为 fallback
     let mut contents = vec![ClipboardContent::Rtf(rtf)];
 
     if cfg!(not(target_os = "macos")) {
